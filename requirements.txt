@@ -1,0 +1,9 @@
+Flask
+uuid
+flask_SQLAlchemy
+flask_restful
+psycopg2
+xmlrunner
+requests
+oauth2client
+redis
