@@ -38,6 +38,8 @@ def auth_callback():
 
     credentials = flow.step2_exchange(code)
 
+    print credentials.json()
+
     #email = credentials.id_token['email']
     google_id = credentials.id_token['sub']
 
@@ -56,8 +58,13 @@ def auth_callback():
         db_session.add(user)
         db_session.commit()
 
+    state = str(uuid.uuid4())
 
-    return redirect("/login")
+    session_redis = {"operation": "login"}
+
+    redis_db.set(state, json.dumps(session_redis))
+
+    return redirect("/login_callback" + "?state=" + state, code=302)
 
 
 

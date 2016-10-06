@@ -2,7 +2,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-SQL_CONNECTION = 'postgresql://sonata:sonata@localhost:5432/usermanagement'
+SQL_CONNECTION = 'postgresql://es:es-test@database:5432/usermanagement'
 
 ALLOWED_HOSTS = "0.0.0.0"
 

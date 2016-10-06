@@ -1,4 +1,6 @@
 
-from bd import init_db
+from db import init_db
 
+print "Applying migrations..."
 init_db()
+print "Done!"
