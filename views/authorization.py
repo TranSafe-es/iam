@@ -131,6 +131,23 @@ def validate():
     return "User not logged in", 401
 
 
+@authorization.route("/user", methods = ['GET'])
+def get_user():
+    if 'Access-Token' not in flask.request.headers:
+        return "ERROR - Access Token Header Required", 400
+
+    access_token = request.headers.get('Access-Token')
+
+    user = Users.query.filter_by(access_token=access_token).first()
+
+    if user == None:
+        return make_response("Invalid token", 400)
+
+    if not valid_token(user):
+        return "User unauthorized", 401
+
+    return make_response(str(user.serialize), 200)
+
 def valid_token(user):
     if user.token_valid == False:
         return False
