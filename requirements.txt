@@ -6,4 +6,4 @@ psycopg2
 xmlrunner
 requests
 oauth2client
-redis
+#redis

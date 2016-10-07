@@ -2,15 +2,15 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-SQL_CONNECTION = 'postgresql://es:es-test@database:5432/usermanagement'
+SQL_CONNECTION = 'postgresql://es:es-test@192.168.0.200:5432/usermanagement'
 
 ALLOWED_HOSTS = "0.0.0.0"
 
-HOST = "localhost"
+HOST = "192.168.0.200"
 PORT = 5001
 
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
+# REDIS_HOST = "localhost"
+# REDIS_PORT = 6379
 
 LOGIN_CALLBACK = "http://" + HOST + ":" + str(PORT) + "/login_callback"
 SIGNUP_CALLBACK = "http://" + HOST + ":" + str(PORT) + "/signup_callback"

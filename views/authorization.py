@@ -10,7 +10,7 @@ import json
 import base64
 import flask
 from flask_restful import reqparse, abort, Api, Resource
-from flask import request, render_template, redirect, make_response
+from flask import request, render_template, redirect, make_response, session
 from flask import jsonify
 from flask import Blueprint
 
@@ -22,7 +22,6 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from settings import *
 from db import db_session
-from db import redis_db
 
 from models import Users
 
@@ -34,28 +33,6 @@ authorization = Blueprint('authorization', __name__)
 @authorization.route("/", methods = ['GET'])
 def index():
     return render_template('index.html')
-
-
-# @authorization.route("/login", methods = ['GET'])
-# @authorization.route("/signup", methods = ['GET'])
-# def signup():
-#     flow = client.flow_from_clientsecrets(
-#         'client_secrets.json',
-#         scope=['profile', 'email', "https://www.googleapis.com/auth/userinfo.profile"],
-#         redirect_uri='http://localhost:5001/google/callback')
-
-#     auth_uri = flow.step1_get_authorize_url()
-
-#     response = redirect(auth_uri)
-
-#     return response
-
-
-# @authorization.route("/login_callback", methods = ['GET'])
-# def login():
-
-#     return
-
 
 
 @authorization.route("/login", methods = ['GET'])
@@ -88,10 +65,19 @@ def login():
             db_session.commit()
 
         #login
-        return flask.redirect(flask.session['referrer'])
+        if not valid_token(user):
+            #renew token
+            user.access_token = base64.b64encode(os.urandom(16))
+            user.creation_date = datetime.datetime.now()
+            user.token_valid = True
+            db_session.commit()
+
+        response = redirect(session['referrer'], 302)
+        response.headers['Access-Token'] = user.access_token
+        return response
 
 
-@authorization.route('/google/callback')
+@authorization.route('/google/callback', methods = ['GET'])
 def oauth2callback():
     flow = client.flow_from_clientsecrets(
       'client_secrets.json',
@@ -105,3 +91,53 @@ def oauth2callback():
         credentials = flow.step2_exchange(auth_code)
         flask.session['credentials'] = credentials.to_json()
         return flask.redirect(flask.url_for('authorization.login'))
+
+
+@authorization.route("/logout", methods = ['GET'])
+def logout():
+    if 'Access-Token' not in flask.request.headers:
+        return "ERROR - Access Token Header Required", 400
+
+    access_token = request.headers.get('Access-Token')
+
+    user = Users.query.filter_by(access_token=access_token).first()
+    if user == None:
+        return make_response("Invalid token", 400)
+
+    user.token_valid = False
+
+    db_session.commit()
+
+    #return redirect(request.referrer, code=302)
+
+    return make_response("User successfully logged out", 200)
+
+
+@authorization.route("/validate", methods = ['POST'])
+def validate():
+    if 'Access-Token' not in flask.request.headers:
+        return "ERROR - Access Token Header Required", 400
+
+    access_token = request.headers.get('Access-Token')
+
+    user = Users.query.filter_by(access_token=access_token).first()
+
+    if user == None:
+        return make_response("Invalid token", 400)
+
+    if valid_token(user):
+        return "Valid Request", 200
+
+    return "User not logged in", 401
+
+
+def valid_token(user):
+    if user.token_valid == False:
+        return False
+
+    expiringDate = user.creation_date + datetime.timedelta(seconds=TOKEN_DURATION)
+
+    if datetime.datetime.now() > expiringDate:
+        return False
+
+    return True

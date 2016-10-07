@@ -4,7 +4,6 @@ from settings import *
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 
-from views.google import google
 from views.authorization import authorization
 
 app = Flask(__name__)
