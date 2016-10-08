@@ -133,20 +133,59 @@ def validate():
 
 @authorization.route("/user", methods = ['GET'])
 def get_user():
+    if 'Access-Token' in flask.request.headers:
+        access_token = request.headers.get('Access-Token')
+        user = Users.query.filter_by(access_token=access_token).first()
+
+        if user == None:
+            return make_response("Invalid token", 400)
+
+        if not valid_token(user):
+            return "User unauthorized", 401
+
+    elif 'email' in request.args:
+        email = request.args.get('email')
+        user = Users.query.filter_by(email=email).first()
+
+        if user == None:
+            return make_response("Invalid email", 400)
+
+    else:
+        return "ERROR - Access Token or email not provided", 400
+
+    return make_response(str(user.serialize), 200)
+
+
+@authorization.route("/user/add_user_data", methods = ['POST'])
+def add_user_data():
+    if 'address' not in flask.form:
+        return build_error_response("Missing field", \
+                                    400,\
+                                    "Address field not present in the request")
+
+    address = request.form.get('address')
+
     if 'Access-Token' not in flask.request.headers:
-        return "ERROR - Access Token Header Required", 400
+        return build_error_response("Missing authentication", \
+                                    401,\
+                                    "Access-Token header not present in the request")
 
     access_token = request.headers.get('Access-Token')
 
     user = Users.query.filter_by(access_token=access_token).first()
 
     if user == None:
-        return make_response("Invalid token", 400)
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is invalid for this service")
 
     if not valid_token(user):
-        return "User unauthorized", 401
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is no longer valid, user logged out or token expired")
 
-    return make_response(str(user.serialize), 200)
+    user.address = address
+    db_session.commit()
 
 def valid_token(user):
     if user.token_valid == False:
@@ -158,3 +197,19 @@ def valid_token(user):
         return False
 
     return True
+
+
+def build_response(data, status):
+    jd = {"status_code:" : status, "error": error, "description": data}
+    resp = Response(response=jd, status=status, mimetype="application/json")
+    return resp
+
+def build_error_response(error_title, status, error_desc):
+    jd = {"status_code:" : status, "error": error, "description": data}
+    resp = Response(response=jd, status=status, mimetype="application/json")
+    return resp
+
+
+
+
+
