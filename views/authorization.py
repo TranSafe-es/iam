@@ -10,7 +10,7 @@ import json
 import base64
 import flask
 from flask_restful import reqparse, abort, Api, Resource
-from flask import request, render_template, redirect, make_response, session
+from flask import request, render_template, redirect, make_response, session, Response
 from flask import jsonify
 from flask import Blueprint
 
@@ -158,7 +158,7 @@ def get_user():
 
 @authorization.route("/user/add_user_data", methods = ['POST'])
 def add_user_data():
-    if 'address' not in flask.form:
+    if 'address' not in request.form:
         return build_error_response("Missing field", \
                                     400,\
                                     "Address field not present in the request")
@@ -187,6 +187,10 @@ def add_user_data():
     user.address = address
     db_session.commit()
 
+    return build_response(user.serialize, \
+                                    200,\
+                                    "User information successfully updated")
+
 def valid_token(user):
     if user.token_valid == False:
         return False
@@ -199,14 +203,14 @@ def valid_token(user):
     return True
 
 
-def build_response(data, status):
-    jd = {"status_code:" : status, "error": error, "description": data}
-    resp = Response(response=jd, status=status, mimetype="application/json")
+def build_response(data, status, desc):
+    jd = {"status_code:" : status, "error": "", "description": desc, "data": data}
+    resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
     return resp
 
 def build_error_response(error_title, status, error_desc):
-    jd = {"status_code:" : status, "error": error, "description": data}
-    resp = Response(response=jd, status=status, mimetype="application/json")
+    jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
+    resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
     return resp
 
 

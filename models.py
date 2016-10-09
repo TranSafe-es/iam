@@ -54,6 +54,6 @@ class Users(Base):
             'address': self.address,
 
             "access_token": self.access_token,
-            "creation_date": self.creation_date,
+            "creation_date": self.creation_date.strftime('%d-%m-%Y %H:%M'),
             "token_valid": self.token_valid
         }
