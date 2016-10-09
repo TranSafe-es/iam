@@ -51,9 +51,10 @@ class Users(Base):
             'email': self.email,
             'picture_url': self.picture_url,
 
-            'address': self.address,
+            'address': self.address
 
-            "access_token": self.access_token,
-            "creation_date": self.creation_date.strftime('%d-%m-%Y %H:%M'),
-            "token_valid": self.token_valid
+            # Doesn't make sense for user to get this information
+            # "access_token": self.access_token,
+            # "creation_date": self.creation_date.strftime('%d-%m-%Y %H:%M'),
+            # "token_valid": self.token_valid
         }

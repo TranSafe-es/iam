@@ -9,7 +9,7 @@ from views.authorization import authorization
 app = Flask(__name__)
 
 
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+app.secret_key = SECRET_KEY
 #app.register_blueprint(google, url_prefix='/google')
 app.register_blueprint(authorization)
 

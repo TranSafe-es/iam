@@ -1,3 +1,6 @@
+################################################
+# Author: Bruno Silva - brunomiguelsilva@ua.pt #
+################################################
 
 import sys
 import os
@@ -8,32 +11,20 @@ import requests
 import datetime
 import json
 import base64
-import flask
-from flask_restful import reqparse, abort, Api, Resource
-from flask import request, render_template, redirect, make_response, session, Response
-from flask import jsonify
-from flask import Blueprint
-
 import httplib2
-from oauth2client import client
+import flask
 
+from flask_restful import reqparse, abort, Api, Resource
+from flask import request, redirect, make_response, session, Response, Blueprint
+from oauth2client import client
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from settings import *
 from db import db_session
-
 from models import Users
 
-from oauth2client import client
-
-
 authorization = Blueprint('authorization', __name__)
-
-@authorization.route("/", methods = ['GET'])
-def index():
-    return render_template('index.html')
-
 
 @authorization.route("/login", methods = ['GET'])
 @authorization.route("/signup", methods = ['GET'])
@@ -51,8 +42,8 @@ def login():
 
         user = Users.query.filter_by(uid=google_id).first()
 
+        # Signup
         if user == None:
-            #signup
             headers = {}
             credentials.apply(headers)
             response = requests.get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", headers=headers)
@@ -64,9 +55,9 @@ def login():
             db_session.add(user)
             db_session.commit()
 
-        #login
+        # Login
         if not valid_token(user):
-            #renew token
+            # Renew token
             user.access_token = base64.b64encode(os.urandom(16))
             user.creation_date = datetime.datetime.now()
             user.token_valid = True
@@ -96,39 +87,52 @@ def oauth2callback():
 @authorization.route("/logout", methods = ['GET'])
 def logout():
     if 'Access-Token' not in flask.request.headers:
-        return "ERROR - Access Token Header Required", 400
+        return build_error_response("Missing authentication", \
+                                    401,\
+                                    "Access-Token header not present in the request")
 
     access_token = request.headers.get('Access-Token')
 
     user = Users.query.filter_by(access_token=access_token).first()
     if user == None:
-        return make_response("Invalid token", 400)
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is invalid for this service")
 
     user.token_valid = False
 
     db_session.commit()
 
     #return redirect(request.referrer, code=302)
-
-    return make_response("User successfully logged out", 200)
+    return build_response("", \
+                        200,\
+                        "User successfuly logged out")
 
 
 @authorization.route("/validate", methods = ['POST'])
 def validate():
     if 'Access-Token' not in flask.request.headers:
-        return "ERROR - Access Token Header Required", 400
+        return build_error_response("Missing authentication", \
+                                    401,\
+                                    "Access-Token header not present in the request")
 
     access_token = request.headers.get('Access-Token')
 
     user = Users.query.filter_by(access_token=access_token).first()
 
     if user == None:
-        return make_response("Invalid token", 400)
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is invalid for this service")
 
-    if valid_token(user):
-        return "Valid Request", 200
+    if not valid_token(user):
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is no longer valid, user logged out or token expired")
 
-    return "User not logged in", 401
+    return build_response("", \
+                        200,\
+                        "Request provided is valid")
 
 
 @authorization.route("/user", methods = ['GET'])
@@ -138,22 +142,32 @@ def get_user():
         user = Users.query.filter_by(access_token=access_token).first()
 
         if user == None:
-            return make_response("Invalid token", 400)
+            return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is invalid for this service")
 
         if not valid_token(user):
-            return "User unauthorized", 401
+            return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is no longer valid, user logged out or token expired")
 
     elif 'email' in request.args:
         email = request.args.get('email')
         user = Users.query.filter_by(email=email).first()
 
         if user == None:
-            return make_response("Invalid email", 400)
+            return build_error_response("Invalid argument", \
+                                    404,\
+                                    "Email provided is invalid for this service")
 
     else:
-        return "ERROR - Access Token or email not provided", 400
+        return build_error_response("Missing field", \
+                                    400,\
+                                    "Neither Address field or Access-Token Header present in the request")
 
-    return make_response(str(user.serialize), 200)
+    return build_response(user.serialize, \
+                        200,\
+                        "User information retrieved")
 
 
 @authorization.route("/user/add_user_data", methods = ['POST'])
@@ -212,8 +226,4 @@ def build_error_response(error_title, status, error_desc):
     jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
     resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
     return resp
-
-
-
-
 
