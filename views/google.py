@@ -31,7 +31,7 @@ def callback():
                authorize_url=GOOGLE_AUTH_URL)
     data = {'code': code,
             'grant_type': 'authorization_code',
-            'redirect_uri': url_for("google.callback", _external=True)}
+            'redirect_uri': GOOGLE_CALLBACK}
 
     google = service.get_auth_session(data=data, decoder=json.loads)
     response = google.get(GOOGLE_USER_INFO_URL)

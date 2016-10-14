@@ -31,7 +31,7 @@ def callback():
                authorize_url=FACEBOOK_AUTH_URL)
     data = {'code': code,
             'grant_type': 'authorization_code',
-            'redirect_uri': url_for("facebook.callback", _external=True)}
+            'redirect_uri': FACEBOOK_CALLBACK}
 
     facebook = service.get_auth_session(data=data)
     response = facebook.get(FACEBOOK_USER_INFO_URL + "?fields=id,name,email,picture")

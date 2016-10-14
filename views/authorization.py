@@ -134,7 +134,7 @@ def service_authorize(platform):
                    authorize_url=FACEBOOK_AUTH_URL,
                    access_token_url=FACEBOOK_TOKEN_URL)
         params = {'scope': 'email public_profile',
-                  'redirect_uri': url_for("facebook.callback", _external=True),
+                  'redirect_uri': FACEBOOK_CALLBACK,
                   'response_type': 'code'}
         url = service.get_authorize_url(**params)
         return url
@@ -146,7 +146,7 @@ def service_authorize(platform):
                    authorize_url=GOOGLE_AUTH_URL,
                    access_token_url=GOOGLE_TOKEN_URL)
         params = {'scope': "profile email https://www.googleapis.com/auth/userinfo.profile",
-                  'redirect_uri': url_for("google.callback", _external=True),
+                  'redirect_uri': GOOGLE_CALLBACK,
                   'response_type': 'code'}
         url = service.get_authorize_url(**params)
         return url
