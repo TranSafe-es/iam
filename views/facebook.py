@@ -1,0 +1,48 @@
+################################################
+# Author: Bruno Silva - brunomiguelsilva@ua.pt #
+################################################
+
+import sys
+import os
+import json
+from rauth import *
+from flask_restful import Api, Resource
+from flask import redirect, session, Blueprint, request, url_for
+
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+from settings import *
+
+facebook = Blueprint('facebook', __name__)
+
+@facebook.route("/callback", methods = ['GET'])
+def callback():
+    if 'code' not in request.args:
+        return build_error_response("Invalid Request", \
+                                    400,\
+                                    "User refused the platform authorization")
+    platform = session['platform']
+    code = request.args.get('code')
+    service = OAuth2Service(
+               name=platform,
+               client_id=FACEBOOK_CLIENT_ID,
+               client_secret=FACEBOOK_CLIENT_SECRET,
+               access_token_url=FACEBOOK_TOKEN_URL,
+               authorize_url=FACEBOOK_AUTH_URL)
+    data = {'code': code,
+            'grant_type': 'authorization_code',
+            'redirect_uri': url_for("facebook.callback", _external=True)}
+
+    facebook = service.get_auth_session(data=data)
+    response = facebook.get(FACEBOOK_USER_INFO_URL + "?fields=id,name,email,picture")
+
+    info ={}
+    info['id'] = response.json()['id']
+    info['email'] = response.json()['email']
+    info['name'] = response.json()['name']
+    info['picture'] = response.json()['picture']["data"]["url"]
+    info['platform'] = platform
+
+    session["info"] = json.dumps(info)
+
+    return redirect(url_for("authorization.login_callback"), code=302)

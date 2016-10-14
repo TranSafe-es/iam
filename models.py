@@ -13,9 +13,9 @@ class Users(Base):
     # Oauth fields
     uid = Column(String, primary_key=True)
     email = Column(String, unique=True)
-    first_name = Column(String)
-    last_name = Column(String)
+    name = Column(String)
     picture_url = Column(String)
+    platform = Column(String)
 
     # Extra user fields (can be added over time)
     address = Column(String)
@@ -25,13 +25,13 @@ class Users(Base):
     creation_date = Column(DateTime, nullable=False, default=datetime.datetime.now())
     token_valid = Column(Boolean, default=True)
 
-    def __init__(self, uid, email, first_name, last_name, picture, address=""):
+    def __init__(self, uid, email, name, picture, platform, address=""):
         self.uid = uid
         self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
+        self.name = name
         self.picture_url = picture
-
+        self.platform = platform
+        
         self.address = address
 
         self.creation_date = datetime.datetime.now()
@@ -39,17 +39,17 @@ class Users(Base):
         self.token_valid = True
 
     def __repr__(self):
-        return "<User(uid='%s', Name='%s', Email='%s', Picture='%s')>" % (self.uid, (self.first_name + " " + self.last_name) , self.email, self.picture_url)
+        return "<User(uid='%s', Name='%s', Email='%s', Picture='%s', Platform='%s')>" % (self.uid, self.name, self.email, self.picture_url, self.platform)
 
     @property
     def serialize(self):
         """Return object data in easily serializeable format"""
         return {
             'uid': self.uid,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
+            'name': self.name,
             'email': self.email,
             'picture_url': self.picture_url,
+            'platform': self.platform,
 
             'address': self.address
 
