@@ -7,7 +7,7 @@ import os
 import json
 from rauth import *
 from flask_restful import Api, Resource
-from flask import redirect, session, Blueprint, request, url_for, , Response
+from flask import redirect, session, Blueprint, request, url_for, Response
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
