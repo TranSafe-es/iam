@@ -21,8 +21,7 @@ authorization = Blueprint('authorization', __name__)
 
 @authorization.route("/login", methods = ['GET'])
 def login_html():
-    if request.referrer != None:
-        session['referrer'] = request.referrer
+    session['referrer'] = request.referrer
     if 'access_token' in request.args:
         session['Access-Token'] = request.args.get('access_token')
     return render_template('login.html')
