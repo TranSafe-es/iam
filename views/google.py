@@ -46,3 +46,8 @@ def callback():
     session["info"] = json.dumps(info)
 
     return redirect(url_for("authorization.login_callback"), code=302)
+
+def build_error_response(error_title, status, error_desc):
+    jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
+    resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
+    return resp
