@@ -26,8 +26,8 @@ log = logging.getLogger()
 
 @authorization.route("/login", methods = ['GET'])
 def login_html():
-    if request.referrer != None:
-        session['referrer'] = request.referrer
+    if 'referer' in request.args:
+        session['referrer'] = request.args.get('referer')
     log.debug(session['referrer'])
     if 'access_token' in request.args:
         session['Access-Token'] = request.args.get('access_token')
@@ -95,9 +95,10 @@ def validate():
         return build_error_response("Missing authentication", \
                                     401,\
                                     "Access-Token header not present in the request")
-    access_token = request.headers.get('Access-Token')
+	access_token = request.headers.get('Access-Token')
+	log.debug(access_token)
     user = Users.query.filter_by(access_token=access_token).first()
-    if user == None:
+	if user == None:
         return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is invalid for this service")
@@ -176,3 +177,4 @@ def build_error_response(error_title, status, error_desc):
     jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
     resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
     return resp
+################################################
