@@ -19,9 +19,16 @@ from models import Users
 
 authorization = Blueprint('authorization', __name__)
 
+import logging
+logging.basicConfig(stream=sys.stderr)
+logging.getLogger().setLevel(logging.DEBUG)
+log = logging.getLogger()
+
 @authorization.route("/login", methods = ['GET'])
 def login_html():
-    session['referrer'] = request.referrer
+    if request.referrer != None:
+        session['referrer'] = request.referrer
+    log.debug(session['referrer'])
     if 'access_token' in request.args:
         session['Access-Token'] = request.args.get('access_token')
     return render_template('login.html')
