@@ -137,7 +137,7 @@ def logout():
 ##################################################################
 @authorization.route("/user", methods = ['GET'])
 def get_user():
-    if 'Access-Token' in flask.request.headers:
+    if 'Access-Token' in request.headers:
         access_token = request.headers.get('Access-Token')
         user = Users.query.filter_by(access_token=access_token).first()
 
@@ -179,7 +179,7 @@ def add_user_data():
 
     address = request.form.get('address')
 
-    if 'Access-Token' not in flask.request.headers:
+    if 'Access-Token' not in request.headers:
         return build_error_response("Missing authentication", \
                                     401,\
                                     "Access-Token header not present in the request")
