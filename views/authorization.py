@@ -85,8 +85,8 @@ def login_callback():
         user.token_valid = True
         db_session.commit()
 
-    response = redirect(session['referrer'], 302)
-    response.headers['Access-Token'] = user.access_token
+    response = redirect(session['referrer']+"?access_token="+user.access_token, 302)
+    #response.headers['Access-Token'] = user.access_token
     return response
 
 @authorization.route("/validate", methods = ['POST'])
