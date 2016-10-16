@@ -98,6 +98,7 @@ def validate():
     access_token = request.headers.get('Access-Token')
     log.debug(access_token)
     user = Users.query.filter_by(access_token=access_token).first()
+    log.debug(user)
     if user == None:
         return build_error_response("Invalid authentication", \
                                     401,\
