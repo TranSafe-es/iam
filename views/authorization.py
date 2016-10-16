@@ -134,6 +134,79 @@ def logout():
                             200,\
                             "User successfuly logged out")
 
+##################################################################
+@authorization.route("/user", methods = ['GET'])
+def get_user():
+    if 'Access-Token' in flask.request.headers:
+        access_token = request.headers.get('Access-Token')
+        user = Users.query.filter_by(access_token=access_token).first()
+
+        if user == None:
+            return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is invalid for this service")
+
+        if not valid_token(user):
+            return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is no longer valid, user logged out or token expired")
+
+    elif 'email' in request.args:
+        email = request.args.get('email')
+        user = Users.query.filter_by(email=email).first()
+
+        if user == None:
+            return build_error_response("Invalid argument", \
+                                    404,\
+                                    "Email provided is invalid for this service")
+
+    else:
+        return build_error_response("Missing field", \
+                                    400,\
+                                    "Neither Address field or Access-Token Header present in the request")
+
+    return build_response(user.serialize, \
+                        200,\
+                        "User information retrieved")
+
+
+@authorization.route("/user/add_user_data", methods = ['POST'])
+def add_user_data():
+    if 'address' not in request.form:
+        return build_error_response("Missing field", \
+                                    400,\
+                                    "Address field not present in the request")
+
+    address = request.form.get('address')
+
+    if 'Access-Token' not in flask.request.headers:
+        return build_error_response("Missing authentication", \
+                                    401,\
+                                    "Access-Token header not present in the request")
+
+    access_token = request.headers.get('Access-Token')
+
+    user = Users.query.filter_by(access_token=access_token).first()
+
+    if user == None:
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is invalid for this service")
+
+    if not valid_token(user):
+        return build_error_response("Invalid authentication", \
+                                    401,\
+                                    "Access-Token is no longer valid, user logged out or token expired")
+
+    user.address = address
+    db_session.commit()
+
+    return build_response(user.serialize, \
+                                    200,\
+                                    "User information successfully updated")
+
+############################################################################################
+
 def service_authorize(platform):
     if platform == "facebook":
         service = OAuth2Service(
