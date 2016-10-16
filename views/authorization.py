@@ -29,6 +29,8 @@ log = logging.getLogger()
 def login_html():
     if 'referer' in request.args:
         session['referrer'] = request.args.get('referer')
+    else:
+        session['referrer'] = request.referrer
     log.debug(session['referrer'])
     if 'access_token' in request.args:
         session['Access-Token'] = request.args.get('access_token')
@@ -39,7 +41,7 @@ def login():
     if 'platform' not in request.form:
         return build_error_response("Missing parameter", \
                             400,\
-                            "Missing platform parameter for SONATA authentication")
+                            "Missing platform parameter for authentication")
     platform = request.form['platform']
     session['platform'] = platform
     url = service_authorize(platform)
@@ -114,11 +116,17 @@ def validate():
 
 @authorization.route("/logout", methods = ['GET'])
 def logout():
-    if 'Access-Token' not in flask.request.headers:
+    if 'referer' in request.args:
+        referrer = request.args.get('referer')
+    else:
+        referrer = request.referrer
+    #if 'Access-Token' not in request.headers:
+    if 'access_token' not in request.args:
         return build_error_response("Missing authentication", \
                                     401,\
                                     "Access-Token header not present in the request")
-    access_token = request.headers.get('Access-Token')
+    #access_token = request.headers.get('Access-Token')
+    access_token = request.args.get('access_token')
     user = Users.query.filter_by(access_token=access_token).first()
     if user == None:
         return build_error_response("Invalid authentication", \
@@ -127,12 +135,7 @@ def logout():
     user.token_valid = False
     db_session.commit()
 
-    if request.referrer != None:
-        return redirect(request.referrer, code=302)
-    else:
-        return build_response("", \
-                            200,\
-                            "User successfuly logged out")
+    return render_template("logout.html", referrer=referrer)
 
 ##################################################################
 @authorization.route("/user", methods = ['GET'])
@@ -151,6 +154,10 @@ def get_user():
                                     401,\
                                     "Access-Token is no longer valid, user logged out or token expired")
 
+        return build_response(user.serialize, \
+                            200,\
+                            "User information retrieved")
+
     elif 'email' in request.args:
         email = request.args.get('email')
         user = Users.query.filter_by(email=email).first()
@@ -160,14 +167,16 @@ def get_user():
                                     404,\
                                     "Email provided is invalid for this service")
 
+        return build_response(json.dumps({"id":user.uid}), \
+                            200,\
+                            "User information retrieved")
+
     else:
         return build_error_response("Missing field", \
                                     400,\
                                     "Neither Address field or Access-Token Header present in the request")
 
-    return build_response(user.serialize, \
-                        200,\
-                        "User information retrieved")
+
 
 
 @authorization.route("/user/add_user_data", methods = ['POST'])
