@@ -96,7 +96,7 @@ def login_callback():
 def validate():
     if 'Access-Token' not in request.headers:
         return build_error_response("Missing authentication", \
-                                    401,\
+                                    400,\
                                     "Access-Token header not present in the request")
     access_token = request.headers.get('Access-Token')
     log.debug(access_token)
@@ -123,8 +123,8 @@ def logout():
     #if 'Access-Token' not in request.headers:
     if 'access_token' not in request.args:
         return build_error_response("Missing authentication", \
-                                    401,\
-                                    "Access-Token header not present in the request")
+                                    400,\
+                    a                "Access-Token header not present in the request")
     #access_token = request.headers.get('Access-Token')
     access_token = request.args.get('access_token')
     user = Users.query.filter_by(access_token=access_token).first()
@@ -167,7 +167,7 @@ def get_user():
                                     404,\
                                     "Email provided is invalid for this service")
 
-        return build_response(json.dumps({"id":user.uid}), \
+        return build_response(json.dumps({'id':user.uid}), \
                             200,\
                             "User information retrieved")
 
