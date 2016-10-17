@@ -65,9 +65,7 @@ def login():
             response.headers['Access-Control-Allow-Origin'] = '*'
             return response
 
-        response = redirect(session["referrer"], code=302)
-        response.headers['Access-Token'] = user.access_token
-        return response
+        return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
 
 @authorization.route("/login_callback", methods = ['GET'])
 def login_callback():
