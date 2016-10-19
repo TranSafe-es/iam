@@ -1,0 +1,177 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Identity Manager
+  description: TranSafe identity manager service API
+  version: "0.0.1"
+# the domain of the service
+host: bsilvr.duckdns.org:8082
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+produces:
+  - application/json
+paths:
+  /login:
+    get:
+      summary: User login
+      description: |
+        Logs in the user using other external services. 
+        It provides different 2 different situations
+        - User never logged in to transafe with the service and a new user is created.
+        - User already logged in previously but is currently logged out and it logs him back in.
+      parameters:
+        - name: redirect_url
+          description: Optional callback page the user wants to be redirected back. If not present the http referer header is used.
+          required: false
+          type: string
+          in: query
+      responses:
+        302:
+          description: Redirect back to the page specified in redirect_url or http referrer. User access_token is returned as a url parameter in both situations and it should be kept for future requests.
+        400:
+          description: Unsupported platform choice.
+        default:
+          description: Unexpected error.
+
+  /logout:
+    get:
+      summary: User logout
+      description: |
+         Logs out the user from transafe. The access token is required to come either in the header or the url (Header is prefered).
+      parameters:
+        - name: Access-Token
+          description: Current user token for the session.
+          required: false
+          type: string
+          in: header
+        - name: access_token
+          description: Current user token for the session.
+          required: false
+          type: string
+          in: query
+        - name: redirect_url
+          description: Optional callback page the user wants to be redirected back. If not present the http referer header is used.
+          required: false
+          type: string
+          in: query
+        
+      responses:
+        302:
+          description: Redirects to the logout page, that is then redirected back to the redirect_url or http referrer after 5 seconds.
+        400:
+          description: Missing authentication. Access-Token was not provided either as an header or as a url parameter
+        401:
+          description: Invalid authentication. The access token is not valid for trasafe.
+        default:
+          description: Unexpected error.
+    
+  /validate:
+    post:
+      summary: Validate request
+      description: |
+         Validates a user request using his access token. Should be called by external services to verify a user identity for a request that needs to be authenticated.
+      parameters:
+        - name: Access-Token
+          description: Current user token for the session.
+          required: true
+          type: string
+          in: header
+        
+      responses:
+        200:
+          description: Access-Token provided is valid and the user is authenticated.
+        401:
+          description: Invalid authentication. Token is not valid for transafe, or it has expired or user has logged out.
+        default:
+          description: Unexpected error.
+    
+  /user:
+    get:
+      produces:
+        - application/json
+      summary: Get user Info
+      description: |
+        This method return all info regarding the user requested. Full user info access is achieved using its access token. If email is provided only uid is obtained.
+      parameters:
+        - name: email
+          description: Email for the requested user
+          required: false
+          type: string
+          in: query
+        - name: Access-Token
+          description: Current user token for the session
+          required: false
+          type: string
+          in: header
+        
+      responses:
+        200:
+          description: User Info.
+          schema: 
+            $ref: "#/definitions/User"
+        400:
+          description: Missing field. Neither Access-Token or email present on the request
+        401:
+          description: Invalid authentication. Token is not valid for sonata, or it has expired or user has logged out.
+        404:
+          description: Email provided is not valid in sonata.
+        default:
+          description: Unexpected error.
+          
+  /user/add_user_data:
+    post:
+      summary: Add additional fields to user.
+      description: |
+         Add additional fields to user. At the moment only an address is being added. User has to be logged in and access token needs to be provided.
+      parameters:
+        - name: Access-Token
+          description: Current user token for the session
+          required: true
+          type: string
+          in: header
+        - name: address
+          description: Address to add to the user
+          required: true
+          type: string
+          in: formData
+        
+      responses:
+        200:
+          description: User Info added.
+          schema: 
+            $ref: "#/definitions/User"
+        400:
+          description: Missing field. Access-Token or address was not present in the request
+        401:
+          description: Invalid authentication. Token is not valid, or it has expired or user has logged out.
+        default:
+          description: Unexpected error.
+        
+definitions:
+  User:
+    properties:
+      uid:
+        type: string
+        description: Unique identifier representing a user in trasafe.
+      email:
+        type: string
+        description: Associated email from the external platform.
+      name:
+        type: string
+        description: Name of the user.
+      picture_url:
+        type: string
+        description: URL to a user picture in the external service.
+      address:
+        type: string
+        description: Address of the user. Has to be added manually by the user, it's relevant for transafe. Can be null in case of address hasn't been added manually yet.
+      platform:
+        type: string
+        description: Name of the platform externally linked.
+      access_token:
+        type: string
+        description: User sonata's access_token.
+   

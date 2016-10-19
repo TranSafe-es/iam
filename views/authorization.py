@@ -31,9 +31,6 @@ def login_html():
         session['referrer'] = request.args.get('referer')
     else:
         session['referrer'] = request.referrer
-    log.debug(session['referrer'])
-    if 'access_token' in request.args:
-        session['Access-Token'] = request.args.get('access_token')
     return render_template('login.html')
 
 @authorization.route("/login", methods = ['POST'])
@@ -49,23 +46,9 @@ def login():
         return build_error_response("Unsupported platform", \
                                     400, \
                                     "The specified platform is not available")
-    if 'Access-Token' not in session:
-        response = redirect(url, code=302)
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        return response
-    else:
-        access_token = session['Access-Token']
-        user = Users.query.filter_by(access_token = access_token).first()
-        if user == None:
-            return build_error_response("Invalid authentication", \
-                                        401,\
-                                        "Access-Token is invalid for this service")
-        if not valid_token(user):
-            response = redirect(url, code=302)
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            return response
-
-        return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
+    response = redirect(url, code=302)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @authorization.route("/login_callback", methods = ['GET'])
 def login_callback():
@@ -87,7 +70,6 @@ def login_callback():
         db_session.commit()
 
     response = redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
-    #response.headers['Access-Token'] = user.access_token
     return response
 
 @authorization.route("/validate", methods = ['POST'])
@@ -114,17 +96,18 @@ def validate():
 
 @authorization.route("/logout", methods = ['GET'])
 def logout():
-    if 'referer' in request.args:
-        referrer = request.args.get('referer')
+    if 'redirect_url' in request.args:
+        referrer = request.args.get('redirect_url')
     else:
         referrer = request.referrer
-    #if 'Access-Token' not in request.headers:
-    if 'access_token' not in request.args:
+    if 'Access-Token' not in request.headers and 'access_token' not in request.args:
         return build_error_response("Missing authentication", \
                                     400,\
-                    a                "Access-Token header not present in the request")
-    #access_token = request.headers.get('Access-Token')
-    access_token = request.args.get('access_token')
+                                    "Access-Token header not present in the request")
+    if 'Access-Token' not in request.headers:
+        access_token = request.args.get('access_token')
+    else:
+        access_token = request.headers.get('Access-Token')
     user = Users.query.filter_by(access_token=access_token).first()
     if user == None:
         return build_error_response("Invalid authentication", \
@@ -135,47 +118,37 @@ def logout():
 
     return render_template("logout.html", referrer=referrer)
 
-##################################################################
+################################################################################
 @authorization.route("/user", methods = ['GET'])
 def get_user():
     if 'Access-Token' in request.headers:
         access_token = request.headers.get('Access-Token')
         user = Users.query.filter_by(access_token=access_token).first()
-
         if user == None:
             return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is invalid for this service")
-
         if not valid_token(user):
             return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is no longer valid, user logged out or token expired")
-
         return build_response(user.serialize, \
                             200,\
                             "User information retrieved")
-
     elif 'email' in request.args:
         email = request.args.get('email')
         user = Users.query.filter_by(email=email).first()
-
         if user == None:
             return build_error_response("Invalid argument", \
                                     404,\
                                     "Email provided is invalid for this service")
-
-        return build_response(json.dumps({'id':user.uid}), \
+        return build_response(json.dumps(user.simple_serialize, \
                             200,\
                             "User information retrieved")
-
     else:
         return build_error_response("Missing field", \
                                     400,\
-                                    "Neither Address field or Access-Token Header present in the request")
-
-
-
+                                    "Neither email or Access-Token Header present in the request")
 
 @authorization.route("/user/add_user_data", methods = ['POST'])
 def add_user_data():
@@ -183,31 +156,23 @@ def add_user_data():
         return build_error_response("Missing field", \
                                     400,\
                                     "Address field not present in the request")
-
     address = request.form.get('address')
-
     if 'Access-Token' not in request.headers:
         return build_error_response("Missing authentication", \
-                                    401,\
+                                    400,\
                                     "Access-Token header not present in the request")
-
     access_token = request.headers.get('Access-Token')
-
     user = Users.query.filter_by(access_token=access_token).first()
-
     if user == None:
         return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is invalid for this service")
-
     if not valid_token(user):
         return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is no longer valid, user logged out or token expired")
-
     user.address = address
     db_session.commit()
-
     return build_response(user.serialize, \
                                     200,\
                                     "User information successfully updated")

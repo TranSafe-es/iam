@@ -31,7 +31,7 @@ class Users(Base):
         self.name = name
         self.picture_url = picture
         self.platform = platform
-        
+
         self.address = address
 
         self.creation_date = datetime.datetime.now()
@@ -54,7 +54,13 @@ class Users(Base):
             'address': self.address
 
             # Doesn't make sense for user to get this information
-            # "access_token": self.access_token,
+            "access_token": self.access_token,
             # "creation_date": self.creation_date.strftime('%d-%m-%Y %H:%M'),
             # "token_valid": self.token_valid
+        }
+    @property
+    def simple_serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'uid': self.uid
         }
