@@ -116,7 +116,7 @@ def logout():
     user.token_valid = False
     db_session.commit()
 
-    return render_template("logout.html", referrer=referrer)
+    return render_template("logout.html", referrer=referrer.split('?')[0], email=user.email)
 
 ################################################################################
 @authorization.route("/user", methods = ['GET'])
@@ -135,6 +135,7 @@ def get_user():
         return build_response(user.serialize, \
                             200,\
                             "User information retrieved")
+
     elif 'email' in request.args:
         email = request.args.get('email')
         user = Users.query.filter_by(email=email).first()
@@ -142,7 +143,9 @@ def get_user():
             return build_error_response("Invalid argument", \
                                     404,\
                                     "Email provided is invalid for this service")
-        return build_response(json.dumps(user.simple_serialize, \
+
+        else:
+            return build_response(user.simple_serialize, \
                             200,\
                             "User information retrieved")
     else:

@@ -1,0 +1,10 @@
+[
+    {
+        "state": "Awaiting for payment",
+        "from": "José Pedro",
+        "to": "Cristiano Ronaldo",
+        "price": "8000",
+        "url": "<a target=\"_blank\" href=\"https://www.olx.pt/anuncio/zenith-el-primero-chronomaster-star-em-ouro-IDyf75W.html#da57c91a95\">Link</a>",
+        "actions": "<a href=\"/change_state?id=EXEMPLOID\">Change state</a>"
+    }
+]

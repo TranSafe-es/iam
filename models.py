@@ -51,7 +51,7 @@ class Users(Base):
             'picture_url': self.picture_url,
             'platform': self.platform,
 
-            'address': self.address
+            'address': self.address,
 
             # Doesn't make sense for user to get this information
             "access_token": self.access_token,
