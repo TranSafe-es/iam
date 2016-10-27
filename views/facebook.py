@@ -8,7 +8,7 @@ import json
 import urllib
 from rauth import *
 from flask_restful import Api, Resource
-from flask import redirect, session, Blueprint, request, url_for, Response
+from flask import redirect, session, Blueprint, request, url_for, Response, render_template
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
@@ -50,5 +50,6 @@ def callback():
 
 def build_error_response(error_title, status, error_desc):
     jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
-    resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
+    #resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
+    resp = render_template("error.html", code=status, error_title=error_title, error_message=error_desc)
     return resp

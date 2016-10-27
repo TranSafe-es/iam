@@ -63,7 +63,7 @@ def login_callback():
             return build_error_response("Duplicate account", \
                                         400,\
                                         "An account with that email already exists, maybe already signup with diferent service using the same email")
-        
+
         user = Users(uid=info["id"], email=info["email"], name=info["name"], picture=info["picture"], platform=info["platform"])
         db_session.add(user)
         db_session.commit()
@@ -244,6 +244,7 @@ def build_response(data, status, desc):
 
 def build_error_response(error_title, status, error_desc):
     jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
-    resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
+    #resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
+    resp = render_template("error.html", code=status, error_title=error_title, error_message=error_desc)
     return resp
 ################################################
