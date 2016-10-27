@@ -59,7 +59,7 @@ def login_callback():
         return build_error_response("Duplicate account", \
                                     400,\
                                     "An account with that email already exists, maybe already signup with diferent service using the same email")
-                                    
+
     user = Users.query.filter_by(uid=info["id"]).first()
 
     # Signup
@@ -157,8 +157,8 @@ def get_user():
                             "User information retrieved")
 
     elif 'id' in request.args:
-        id = request.args.get('id')
-        user = Users.query.filter_by(id=id).first()
+        uid = request.args.get('id')
+        user = Users.query.filter_by(uid=uid).first()
         if user == None:
             return build_error_response("Invalid argument", \
                                     404,\
