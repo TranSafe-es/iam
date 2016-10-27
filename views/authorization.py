@@ -54,16 +54,16 @@ def login():
 def login_callback():
     info = json.loads(session["info"])
 
-    user = Users.query.filter_by(email=info["email"]).first()
-    if user != None:
-        return build_error_response("Duplicate account", \
-                                    400,\
-                                    "An account with that email already exists, maybe already signup with diferent service using the same email")
-
     user = Users.query.filter_by(uid=info["id"]).first()
 
     # Signup
     if user == None:
+        user = Users.query.filter_by(email=info["email"]).first()
+        if user != None:
+            return build_error_response("Duplicate account", \
+                                        400,\
+                                        "An account with that email already exists, maybe already signup with diferent service using the same email")
+        
         user = Users(uid=info["id"], email=info["email"], name=info["name"], picture=info["picture"], platform=info["platform"])
         db_session.add(user)
         db_session.commit()
