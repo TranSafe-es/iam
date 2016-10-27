@@ -244,7 +244,7 @@ def build_response(data, status, desc):
 
 def build_error_response(error_title, status, error_desc):
     jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
-    #resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
-    resp = render_template("error.html", code=status, error_title=error_title, error_message=error_desc)
+    resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
+    #resp = render_template("error.html", code=status, error_title=error_title, error_message=error_desc)
     return resp
 ################################################
