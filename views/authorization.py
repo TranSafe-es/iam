@@ -53,6 +53,13 @@ def login():
 @authorization.route("/login_callback", methods = ['GET'])
 def login_callback():
     info = json.loads(session["info"])
+
+    user = Users.query.filter_by(email=info["email"]).first()
+    if user != None:
+        return build_error_response("Duplicate account", \
+                                    400,\
+                                    "An account with that email already exists, maybe already signup with diferent service using the same email")
+
     user = Users.query.filter_by(uid=info["id"]).first()
 
     # Signup
@@ -146,6 +153,19 @@ def get_user():
 
         else:
             return build_response(user.simple_serialize, \
+                            200,\
+                            "User information retrieved")
+
+    elif 'id' in request.args:
+        id = request.args.get('id')
+        user = Users.query.filter_by(id=id).first()
+        if user == None:
+            return build_error_response("Invalid argument", \
+                                    404,\
+                                    "ID provided is invalid for this service")
+
+        else:
+            return build_response(user.serialize, \
                             200,\
                             "User information retrieved")
     else:
