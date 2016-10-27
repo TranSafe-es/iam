@@ -34,7 +34,7 @@ def callback():
             'redirect_uri': FACEBOOK_CALLBACK}
 
     facebook = service.get_auth_session(data=data)
-    response = facebook.get(FACEBOOK_USER_INFO_URL + "?fields=id,name,email,picture")
+    response = facebook.get(FACEBOOK_USER_INFO_URL + "?fields=id,name,email,picturewidth(500).height(500)")
 
     info ={}
     info['id'] = response.json()['id']
