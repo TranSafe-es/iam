@@ -93,9 +93,7 @@ def validate():
                                     400,\
                                     "Access-Token header not present in the request")
     access_token = request.headers.get('Access-Token')
-    log.debug(access_token)
     user = Users.query.filter_by(access_token=access_token).first()
-    log.debug(user)
     if user == None:
         return build_error_response("Invalid authentication", \
                                     401,\
@@ -104,6 +102,8 @@ def validate():
         return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is no longer valid, user logged out or token expired")
+    user.creation_date = datetime.datetime.now()
+    db_session.commit()
     return build_response("", \
                         200,\
                         "Request provided is valid")
