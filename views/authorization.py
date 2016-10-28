@@ -25,6 +25,10 @@ logging.basicConfig(stream=sys.stderr)
 logging.getLogger().setLevel(logging.DEBUG)
 log = logging.getLogger()
 
+@authorization.route("/", methods = ['GET'])
+def home():
+    return render_template('home.html')
+
 @authorization.route("/login", methods = ['GET'])
 def login_html():
     if 'referer' in request.args:
@@ -36,14 +40,14 @@ def login_html():
 @authorization.route("/login", methods = ['POST'])
 def login():
     if 'platform' not in request.form:
-        return build_error_response("Missing parameter", \
+        return build_html_error_response("Missing parameter", \
                             400,\
                             "Missing platform parameter for authentication")
     platform = request.form['platform']
     session['platform'] = platform
     url = service_authorize(platform)
     if url == None:
-        return build_error_response("Unsupported platform", \
+        return build_html_error_response("Unsupported platform", \
                                     400, \
                                     "The specified platform is not available")
     response = redirect(url, code=302)
@@ -60,7 +64,7 @@ def login_callback():
     if user == None:
         user = Users.query.filter_by(email=info["email"]).first()
         if user != None:
-            return build_error_response("Duplicate account", \
+            return build_html_error_response("Duplicate account", \
                                         400,\
                                         "An account with that email already exists, maybe already signup with diferent service using the same email")
 
@@ -108,7 +112,7 @@ def logout():
     else:
         referrer = request.referrer
     if 'Access-Token' not in request.headers and 'access_token' not in request.args:
-        return build_error_response("Missing authentication", \
+        return build_html_error_response("Missing authentication", \
                                     400,\
                                     "Access-Token header not present in the request")
     if 'Access-Token' not in request.headers:
@@ -117,7 +121,7 @@ def logout():
         access_token = request.headers.get('Access-Token')
     user = Users.query.filter_by(access_token=access_token).first()
     if user == None:
-        return build_error_response("Invalid authentication", \
+        return build_html_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is invalid for this service")
     user.token_valid = False
@@ -245,6 +249,10 @@ def build_response(data, status, desc):
 def build_error_response(error_title, status, error_desc):
     jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
     resp = Response(response=json.dumps(jd), status=status, mimetype="application/json")
-    #resp = render_template("error.html", code=status, error_title=error_title, error_message=error_desc)
+    return resp
+
+def build_html_error_response(error_title, status, error_desc):
+    jd = {"status_code:" : status, "error": error_title, "description": error_desc, "data": ""}
+    resp = render_template("error.html", code=status, error_title=error_title, error_message=error_desc)
     return resp
 ################################################
