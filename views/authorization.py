@@ -27,7 +27,8 @@ log = logging.getLogger()
 
 @authorization.route("/", methods = ['GET'])
 def home():
-    return render_template('home.html')
+    message = ""
+    return render_template('home.html', message=message)
 
 @authorization.route("/login", methods = ['GET'])
 def login_html():
@@ -35,6 +36,8 @@ def login_html():
         session['referrer'] = request.args.get('referer')
     else:
         session['referrer'] = request.referrer
+    if session['referrer'] == None:
+        session['referrer'] = url_for("authorization.home")
     return render_template('login.html')
 
 @authorization.route("/login", methods = ['POST'])
