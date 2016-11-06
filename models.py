@@ -64,3 +64,25 @@ class Users(Base):
         return {
             'uid': self.uid
         }
+
+class Apps(Base):
+    __tablename__ = 'apps'
+
+    client_id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    client_secret = Column(String, unique=True, default=base64.b32encode(os.urandom(100)))
+    valid = Column(Boolean, default=True)
+
+    name = Column(String, nullable=False)
+    admin_email = Column(String, nullable=False)
+    homepage = Column(String, nullable=False)
+    callback = Column(String, nullable=False)
+
+    def __init__(self, admin_email, name, homepage, callback):
+        self.admin_email = admin_email
+        self.name = name
+        self.homepage = homepage
+        self.callback = callback
+
+        self.client_id = str(uuid.uuid4())
+        self.client_secret = base64.b32encode(os.urandom(100))
+        self.valid = True

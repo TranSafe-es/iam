@@ -9,12 +9,14 @@ from settings import *
 from views.authorization import authorization
 from views.google import google
 from views.facebook import facebook
+from views.apps import apps
 
 app = Flask(__name__)
 
 app.secret_key = SECRET_KEY
 
 app.register_blueprint(authorization)
+app.register_blueprint(apps, url_prefix='/apps')
 app.register_blueprint(google, url_prefix='/google')
 app.register_blueprint(facebook, url_prefix='/facebook')
 

@@ -1,0 +1,53 @@
+<html>
+
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/dollar.png') }}" type="image/png">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Register App</title>
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/font-awesome.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap-social.css') }}" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
+            <div class="login-panel panel panel-default">
+                <div class="panel-heading">
+                    <center> IAM Service </center>
+                </div>
+                <div class="panel-body">
+                    <p>Create new Developer App</p>
+                    <form action="/apps/create" method="post">
+                        <div class="form-group">
+                            <label for="name">App name:</label>
+                            <input type="text" class="form-control" name="name" placeholder="App Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin_email">Admin Email:</label>
+                            <input type="email" class="form-control" name="admin_email" placeholder="Admin Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="homepage">Service Homepage:</label>
+                            <input type="text" class="form-control" name="homepage" placeholder="Service Homepage">
+                        </div>
+                        <div class="form-group">
+                            <label for="callback_url">Service Callback:</label>
+                            <input type="text" class="form-control" name="callback_url" placeholder="Service Callback">
+                        </div>
+                        <input type="submit" value="Register App" class="btn btn-default">
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.col-->
+    </div>
+    <script src=" {{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
+    <script src=" {{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+</body></html>
