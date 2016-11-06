@@ -1,10 +1,10 @@
 <html>
 
 <head>
-    <link rel="shortcut icon" href="static/images/dollar.png" type="image/png">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/dollar.png') }}" type="image/png">
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title> IAM HomePage</title>
+    <title>View App</title>
 
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
@@ -22,17 +22,24 @@
                     <center> IAM Service </center>
                 </div>
                 <div class="panel-body">
-                    <a class="btn btn-default" href="{{ url_for('apps.register') }}">Register new app</a>
-                    <a class="btn btn-default" href="{{ url_for('apps.view_proxy') }}">View existing app</a>
-                    <a class="btn btn-default" href="{{ url_for('apps.edit_proxy') }}">Edit existing app</a>
+                    <center>View App</center>
+                    <label for="name">Client id:</label>
+                    <input type="text" id="label" class="form-control" name="name" placeholder="Insert your app client id" onchange="myFunction()">
+                    <br>
+                    <a class="btn btn-default" id="button">View</a>
+                    <a class="btn btn-default" href="{{ url_for('authorization.home') }}">Homepage</a>
                 </div>
 
             </div>
         </div>
         <!-- /.col-->
     </div>
+    <script>
+        function myFunction(){
+            document.getElementById("button").href = document.getElementById("label").value;
+        }
+    </script>
+
     <script src=" {{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
     <script src=" {{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-</body>
-
-</html>
+</body></html>

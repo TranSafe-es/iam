@@ -1,0 +1,78 @@
+<html>
+
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/dollar.png') }}" type="image/png">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Edit App</title>
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/font-awesome.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap-social.css') }}" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="col-md-12 col-sm-12 col-lg-12">
+        <center> An account with the same email has been found, please choose the one you wish to use. </center>
+    </div>
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-3 col-md-offset-2">
+            <div class="login-panel panel panel-default">
+                <div class="panel-heading">
+                    <center> Facebook </center>
+                </div>
+                <div class="panel-body">
+                    <center>Facebook</center>
+                    <form action="/merge" method="post">
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <input type="text" class="form-control" value="{{facebook.name}}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" class="form-control" value="{{facebook.email}}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Picture:</label>
+                            <img src="{{facebook.picture_url}}" style="width:100%;">
+                        </div>
+                        <input type="hidden" name="choice" value="facebook">
+                        <input type="submit" value="Choose Facebook" class="btn btn-default">
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-3 col-md-offset-2">
+            <div class="login-panel panel panel-default">
+                <div class="panel-heading">
+                    <center> Google </center>
+                </div>
+                <div class="panel-body">
+                    <form action="/merge" method="post">
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <input type="text" class="form-control" value="{{google.name}}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" class="form-control" value="{{google.email}}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Picture:</label>
+                            <img src="{{google.picture_url}}" style="width:100%;">
+                        </div>
+                        <input type="hidden" name="choice" value="google">
+                        <input type="submit" value="Choose Google" class="btn btn-default">
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.col-->
+    </div>
+    <script src=" {{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
+    <script src=" {{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+</body></html>

@@ -25,6 +25,10 @@ class Users(Base):
     creation_date = Column(DateTime, nullable=False, default=datetime.datetime.now())
     token_valid = Column(Boolean, default=True)
 
+    # Extra application fields
+    has_merged = Column(Boolean, default=False)
+
+
     def __init__(self, uid, email, name, picture, platform, address=""):
         self.uid = uid
         self.email = email

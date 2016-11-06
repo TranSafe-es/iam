@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <link rel="shortcut icon" href="static/images/dollar.png" type="image/png">
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>404 Error Page</title>
+
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/font-awesome.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/bootstrap-social.css') }}" rel="stylesheet">
+
+    </head>
+
+    <body>
+
+        <div class="row">
+            <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <center> 404 Error (Not Found) </center>
+                    </div>
+        <div class="panel-body">
+            <p>The resource you were trying to reach doesn't exist!!</p>
+
+            <p>Go back to Homepage <a href="{{ url_for('authorization.home') }}">here</a></p>
+        </div>
+
+    </div>
+</div>
+<!-- /.col-->
+</div>
+    <script src=" {{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
+    <script src=" {{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    </body>
+</html>

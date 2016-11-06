@@ -16,7 +16,9 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from settings import *
 from db import db_session
-from models import Users
+from models import Users, Apps
+from views.apps import require_api_key, localhost_only
+from views.apps import apps
 
 authorization = Blueprint('authorization', __name__)
 
@@ -31,16 +33,23 @@ def home():
     return render_template('home.html', message=message)
 
 @authorization.route("/login", methods = ['GET'])
+@require_api_key
 def login_html():
+    app = Apps.query.filter_by(client_secret=session["apitoken"]).first()
+    if not request.url_root.startswith(app.homepage):
+        return build_html_error_response("Request origin missmatch", 400, "Request came from different origin that what was speficied in app.")
     if 'referer' in request.args:
         session['referrer'] = request.args.get('referer')
     else:
         session['referrer'] = request.referrer
     if session['referrer'] == None:
-        session['referrer'] = url_for("authorization.home")
-    return render_template('login.html')
+        session['referrer'] = app.callback
+    if session['referrer'] != app.callback:
+        return build_html_error_response("Callback url missmatch", 400, "Callback provided is diferent from the registered one")
+    return render_template('login.html', name=app.name)
 
 @authorization.route("/login", methods = ['POST'])
+@localhost_only
 def login():
     if 'platform' not in request.form:
         return build_html_error_response("Missing parameter", \
@@ -58,6 +67,7 @@ def login():
     return response
 
 @authorization.route("/login_callback", methods = ['GET'])
+@localhost_only
 def login_callback():
     info = json.loads(session["info"])
 
@@ -67,11 +77,20 @@ def login_callback():
     if user == None:
         user = Users.query.filter_by(email=info["email"]).first()
         if user != None:
-            return build_html_error_response("Duplicate account", \
-                                        400,\
-                                        "An account with that email already exists, maybe already signup with diferent service using the same email")
+            if user.has_merged:
+                user.access_token = base64.b64encode(os.urandom(16))
+                user.creation_date = datetime.datetime.now()
+                user.token_valid = True
+                db_session.commit()
+                return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
+
+            if session["platform"] == "facebook":
+                return render_template("merge_option.html", facebook=info, google=user)
+            elif session["platform"] == "google":
+                return render_template("merge_option.html", facebook=user, google=info)
 
         user = Users(uid=info["id"], email=info["email"], name=info["name"], picture=info["picture"], platform=info["platform"])
+
         db_session.add(user)
         db_session.commit()
 
@@ -83,10 +102,29 @@ def login_callback():
         user.token_valid = True
         db_session.commit()
 
-    response = redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
-    return response
+    return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
+
+@authorization.route("/merge", methods = ['POST'])
+@localhost_only
+def merge():
+    info = json.loads(session["info"])
+    user = Users.query.filter_by(email=info["email"]).first()
+    if request.form.get("choice") == session["platform"]:
+        user.uid=info["uid"]
+        user.email=info["email"]
+        user.name=info["name"]
+        user.picture=info["picture"]
+        user.platform = info["platform"]
+
+    user.access_token = base64.b64encode(os.urandom(16))
+    user.creation_date = datetime.datetime.now()
+    user.token_valid = True
+    db_session.commit()
+
+    return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
 
 @authorization.route("/validate", methods = ['POST'])
+@require_api_key
 def validate():
     if 'Access-Token' not in request.headers:
         return build_error_response("Missing authentication", \
@@ -109,6 +147,7 @@ def validate():
                         "Request provided is valid")
 
 @authorization.route("/logout", methods = ['GET'])
+@require_api_key
 def logout():
     if 'redirect_url' in request.args:
         referrer = request.args.get('redirect_url')
@@ -134,6 +173,7 @@ def logout():
 
 ################################################################################
 @authorization.route("/user", methods = ['GET'])
+@require_api_key
 def get_user():
     if 'Access-Token' in request.headers:
         access_token = request.headers.get('Access-Token')
@@ -180,6 +220,7 @@ def get_user():
                                     "Neither email or Access-Token Header present in the request")
 
 @authorization.route("/user/add_user_data", methods = ['POST'])
+@require_api_key
 def add_user_data():
     if 'address' not in request.form:
         return build_error_response("Missing field", \
