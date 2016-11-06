@@ -59,6 +59,7 @@
                                 <textarea class="form-control" rows="3" style="resize: none" readonly>{{app.client_secret}}</textarea>
                             </div>
                         </div>
+                        <p>Please save the client id and secret, especially the client id as you wont be able to get the secret again without it.</p>
                     </form>
                     <a class="btn btn-default" href="/apps/renew/{{app.client_id}}">Renew Client Secret</a>
                     <a class="btn btn-default" href="{{ url_for('authorization.home') }}">Homepage</a>

@@ -119,6 +119,8 @@ def merge():
     user.access_token = base64.b64encode(os.urandom(16))
     user.creation_date = datetime.datetime.now()
     user.token_valid = True
+
+    user.has_merged = True
     db_session.commit()
 
     return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
