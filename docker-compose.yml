@@ -1,19 +1,21 @@
 version: '2'
 services:
-  db:
-    build: postgre/.
-    ports:
-      - "5432:5432"
-    expose:
-      - "5432"
-  web:
-    build: .
+ db:
+  restart: always
+  image: bsilvr/postgres-es
+  container_name: postgres-iam
+  ports:
+   - "5432:5432"
+  environment:
+   - POSTGRES_PASSWORD=es-test
+   - POSTGRES_DB=usermanagement
+   - POSTGRES_USER=es
 
-    ports:
-      - "5000:5000"
-
-    expose:
-      - "5000"
-
-    depends_on:
-      - db
+ flask:
+  restart: always
+  build: .
+  container_name: es-apache-iam
+  depends_on:
+    - db
+  ports:
+    - "80:80"
