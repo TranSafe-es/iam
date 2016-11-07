@@ -14,11 +14,12 @@ class Users(Base):
     uid = Column(String, primary_key=True)
     email = Column(String, unique=True)
     name = Column(String)
-    picture_url = Column(String)
+    picture = Column(String)
     platform = Column(String)
 
     # Extra user fields (can be added over time)
     address = Column(String)
+    phone = Column(String)
 
     # Authentication required fields
     access_token = Column(String, unique=True)
@@ -29,21 +30,22 @@ class Users(Base):
     has_merged = Column(Boolean, default=False)
 
 
-    def __init__(self, uid, email, name, picture, platform, address=""):
+    def __init__(self, uid, email, name, picture, platform, address="", phone=""):
         self.uid = uid
         self.email = email
         self.name = name
-        self.picture_url = picture
+        self.picture = picture
         self.platform = platform
 
         self.address = address
+        self.phone = phone
 
         self.creation_date = datetime.datetime.now()
         self.access_token = base64.b64encode(os.urandom(16))
         self.token_valid = True
 
     def __repr__(self):
-        return "<User(uid='%s', Name='%s', Email='%s', Picture='%s', Platform='%s')>" % (self.uid, self.name, self.email, self.picture_url, self.platform)
+        return "<User(uid='%s', Name='%s', Email='%s', Picture='%s', Platform='%s')>" % (self.uid, self.name, self.email, self.picture, self.platform)
 
     @property
     def serialize(self):
@@ -52,10 +54,11 @@ class Users(Base):
             'uid': self.uid,
             'name': self.name,
             'email': self.email,
-            'picture_url': self.picture_url,
+            'picture_url': self.picture,
             'platform': self.platform,
 
             'address': self.address,
+            'phone': self.phone,
 
             # Doesn't make sense for user to get this information
             "access_token": self.access_token,

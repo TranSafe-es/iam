@@ -224,10 +224,7 @@ def get_user():
 @authorization.route("/user/add_user_data", methods = ['POST'])
 @require_api_key
 def add_user_data():
-    if 'address' not in request.form:
-        return build_error_response("Missing field", \
-                                    400,\
-                                    "Address field not present in the request")
+    phone = request.form.get('phone')
     address = request.form.get('address')
     if 'Access-Token' not in request.headers:
         return build_error_response("Missing authentication", \
@@ -243,7 +240,10 @@ def add_user_data():
         return build_error_response("Invalid authentication", \
                                     401,\
                                     "Access-Token is no longer valid, user logged out or token expired")
-    user.address = address
+    if address:
+        user.address = address
+    if phone:
+        user.phone = phone
     db_session.commit()
     return build_response(user.serialize, \
                                     200,\

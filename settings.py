@@ -2,11 +2,11 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-SQL_CONNECTION = 'postgresql://es:es-test@192.168.0.201:5432/usermanagement'
+SQL_CONNECTION = 'postgresql://es:es-test@localhost:5432/usermanagement'
 
 ALLOWED_HOSTS = "0.0.0.0"
 
-HOST = "192.168.0.201"
+HOST = "localhost"
 PORT = 5001
 
 TOKEN_DURATION = 3600
