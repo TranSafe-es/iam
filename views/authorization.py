@@ -17,7 +17,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from settings import *
 from db import db_session
 from models import Users, Apps
-from views.apps import require_api_key, localhost_only
+from views.apps import require_api_key
 from views.apps import apps
 
 authorization = Blueprint('authorization', __name__)
@@ -49,7 +49,6 @@ def login_html():
     return render_template('login.html', name=app.name)
 
 @authorization.route("/login", methods = ['POST'])
-@localhost_only
 def login():
     if 'platform' not in request.form:
         return build_html_error_response("Missing parameter", \
@@ -67,7 +66,6 @@ def login():
     return response
 
 @authorization.route("/login_callback", methods = ['GET'])
-@localhost_only
 def login_callback():
     info = json.loads(session["info"])
 
@@ -105,7 +103,6 @@ def login_callback():
     return redirect(session['referrer']+ "?" +urllib.urlencode({"access_token": user.access_token}), 302)
 
 @authorization.route("/merge", methods = ['POST'])
-@localhost_only
 def merge():
     info = json.loads(session["info"])
     user = Users.query.filter_by(email=info["email"]).first()
@@ -248,6 +245,12 @@ def add_user_data():
     return build_response(user.serialize, \
                                     200,\
                                     "User information successfully updated")
+
+@authorization.route("/user/count", methods = ['GET'])
+@require_api_key
+def get_user_count():
+    count = Users.query.count()
+    return build_response(count, 200, "User count successfully retrieved")
 
 ############################################################################################
 

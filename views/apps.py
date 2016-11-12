@@ -133,14 +133,3 @@ def require_api_key(api_method):
             abort(401)
 
     return check_api_key
-
-def localhost_only(api_method):
-    @wraps(api_method)
-
-    def check_localhost(*args, **kwargs):
-        if request.url_root.startswith("http://localhost"):
-            return api_method(*args, **kwargs)
-        else:
-            abort(401)
-
-    return check_localhost
