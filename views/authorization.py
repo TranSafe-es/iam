@@ -36,8 +36,8 @@ def home():
 @require_api_key
 def login_html():
     app = Apps.query.filter_by(client_secret=session["apitoken"]).first()
-    if not request.url_root.startswith(app.homepage):
-        return build_html_error_response("Request origin missmatch", 400, "Request came from different origin that what was speficied in app.")
+    #if not request.url_root.startswith(app.homepage):
+    #    return build_html_error_response("Request origin missmatch", 400, "Request came from different origin that what was speficied in app.")
     if 'referer' in request.args:
         session['referrer'] = request.args.get('referer')
     else:
