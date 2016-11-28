@@ -107,7 +107,7 @@ def merge():
     info = json.loads(session["info"])
     user = Users.query.filter_by(email=info["email"]).first()
     if request.form.get("choice") == session["platform"]:
-        user.uid=info["uid"]
+        user.uid=info["id"]
         user.email=info["email"]
         user.name=info["name"]
         user.picture=info["picture"]
